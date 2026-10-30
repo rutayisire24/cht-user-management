@@ -6,6 +6,9 @@ import RemotePlaceCache, { RemotePlace } from '../lib/remote-place-cache';
 import SessionCache from '../services/session-cache';
 import SearchLib from '../lib/search';
 
+// the dropdown opens on focus, so an empty search can match every place at a level
+const MAX_SEARCH_RESULTS = 50;
+
 export default async function place(fastify: FastifyInstance) {
   // returns search results dropdown
   fastify.post('/search', async (req, resp) => {
@@ -49,7 +52,8 @@ export default async function place(fastify: FastifyInstance) {
       place,
       div: `search_container_${dataPrefix}${hierarchyLevel.property_name}`,
       prefix: dataPrefix,
-      searchResults,
+      searchResults: searchResults.slice(0, MAX_SEARCH_RESULTS),
+      totalResults: searchResults.length,
       level,
     });
   });

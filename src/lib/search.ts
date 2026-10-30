@@ -21,10 +21,17 @@ export default class SearchLib {
     const localResults: Place[] = sessionCache ? await getLocalResults(hierarchyLevel, sessionCache, searchString) : [];
     const remoteResults: RemotePlace[] = await getRemoteResults(searchString, hierarchyLevel, contactType, formData, chtApi, dataPrefix);
     
-    const searchResults: RemotePlace[] = _.uniqWith([
+    const uniqueResults: RemotePlace[] = _.uniqWith([
       ...localResults.map(r => r.asRemotePlace()),
       ...remoteResults,
     ], (placeA: RemotePlace, placeB: RemotePlace) => placeA.name.formatted === placeB.name.formatted && placeA.type === placeB.type);
+
+    // names starting with the search string first, then alphabetical
+    const sortName = (place: RemotePlace) => place.name.formatted?.toLowerCase() ?? '';
+    const searchResults = _.sortBy(uniqueResults, [
+      place => !!searchString && !sortName(place).startsWith(searchString),
+      sortName,
+    ]);
 
     if (searchResults.length === 0) {
       searchResults.push(RemotePlaceResolver.NoResult);

@@ -104,6 +104,39 @@ describe('lib/search.ts', () => {
     const actual = await SearchLib.search(contactType, formData, 'hierarchy_', replacementLevel, chtApi, sessionCache);
     expect(actual).to.deep.eq([RemotePlaceResolver.NoResult]);
   });
+
+  describe('ordering', () => {
+    const sibling = (id: string, name: string): ChtDoc => ({
+      _id: id,
+      name,
+      parent: { _id: parentPlace._id, parent: parentPlace.parent },
+    });
+    const places = [
+      sibling('zebra', 'Zebra Me'),
+      sibling('alpha', 'Alpha Me'),
+      sibling('me-first', 'Me Kabubu'),
+    ];
+
+    it('empty search returns all places alphabetically', async () => {
+      const sessionCache = SessionCache.getForSession(mockChtSession());
+      const contactType = mockValidContactType('string', undefined);
+      const chtApi = mockChtApi([], [parentPlace], places);
+
+      const [replacementLevel] = Config.getHierarchyWithReplacement(contactType);
+      const actual = await SearchLib.search(contactType, { hierarchy_replacement: '' }, 'hierarchy_', replacementLevel, chtApi, sessionCache);
+      expect(actual.map(p => p.id)).to.deep.eq(['alpha', 'me-first', 'zebra']);
+    });
+
+    it('names starting with the search string come first', async () => {
+      const sessionCache = SessionCache.getForSession(mockChtSession());
+      const contactType = mockValidContactType('string', undefined);
+      const chtApi = mockChtApi([], [parentPlace], places);
+
+      const [replacementLevel] = Config.getHierarchyWithReplacement(contactType);
+      const actual = await SearchLib.search(contactType, { hierarchy_replacement: 'me' }, 'hierarchy_', replacementLevel, chtApi, sessionCache);
+      expect(actual.map(p => p.id)).to.deep.eq(['me-first', 'alpha', 'zebra']);
+    });
+  });
 });
 
 function assertPlaceMatchesDoc(remotePlace: RemotePlace[], docs: ChtDoc[]) {

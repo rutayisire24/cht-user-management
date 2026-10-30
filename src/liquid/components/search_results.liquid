@@ -3,6 +3,7 @@
     {% for searchResult in searchResults %}
       <a
         class="dropdown-item"
+        onmousedown="event.preventDefault()"
         hx-post="/search/select?place_id={{searchResult.id}}&result_name={{searchResult.name}}&level={{level}}&op={{op}}&prefix={{ prefix }}"
         hx-on::after-request="_paq.push(['trackEvent', 'Search', 'select result']);"
         hx-target="#{{div}}"
@@ -15,5 +16,10 @@
         {{ searchResult.name }}
       </a>
     {% endfor %}
+    {% if totalResults > searchResults.size %}
+      <div class="dropdown-item has-text-grey is-size-7">
+        Showing {{ searchResults.size }} of {{ totalResults }} — type to narrow
+      </div>
+    {% endif %}
   </div>
 </div>

@@ -16,10 +16,10 @@
       hx-post="/search?place_id={{place.id}}&type={{ type }}&op={{op}}&level={{ hierarchy.level }}&prefix={{ prefix }}"
       hx-on::after-request="_paq.push(['trackEvent', 'Search', 'typing', '{{type}}']);"
       hx-on:input="document.getElementById('{{ property_name_id }}')?.remove(); resetLowerHierarchyInputs(this)"
-      hx-on:blur="const i=this; setTimeout(function(){ if(!document.getElementById('{{ property_name_id }}')) { i.value=''; } }, 250)"
+      hx-on:blur="const i=this; setTimeout(function(){ if(!document.getElementById('{{ property_name_id }}')) { i.value=''; } document.getElementById('search_results_{{ property_name }}')?.replaceChildren(); }, 250)"
       hx-vals=""
-      placeholder="start typing to see suggestions"
-      hx-trigger="keyup changed delay:200ms, search"
+      placeholder="click to choose, or type to search"
+      hx-trigger="focus, keyup changed delay:200ms, search"
       hx-target="#search_results_{{ property_name }}"
       hx-swap="innerHTML"
       {% if hierarchy.required %}
